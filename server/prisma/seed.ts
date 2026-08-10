@@ -1,4 +1,4 @@
-import { PrismaClient, UserRole, CustomerType, CustomerStatus, MovementType } from '@prisma/client';
+import { PrismaClient, UserRole, CustomerType, CustomerStatus, MovementType, ChallanStatus, Prisma } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
@@ -132,7 +132,7 @@ async function main() {
       category: 'Electrical Supplies',
       unitPrice: 2890.00,
       currentStock: 15,
-      minStockAlert: 25, // Low Stock test
+      minStockAlert: 25,
       location: 'Warehouse Bay C-01',
     },
     {
@@ -141,7 +141,7 @@ async function main() {
       category: 'Hardware & Piping',
       unitPrice: 4200.00,
       currentStock: 0,
-      minStockAlert: 10, // Critical Stock test
+      minStockAlert: 10,
       location: 'Warehouse Bay A-05',
     },
     {
@@ -155,6 +155,7 @@ async function main() {
     },
   ];
 
+  const createdProductsMap = new Map<string, any>();
   for (const prod of productsData) {
     const product = await prisma.product.upsert({
       where: { sku: prod.sku },
@@ -168,8 +169,8 @@ async function main() {
       },
       create: prod,
     });
+    createdProductsMap.set(prod.sku, product);
 
-    // Record initial stock movement log if stock > 0
     if (prod.currentStock > 0) {
       await prisma.stockMovement.createMany({
         data: [
@@ -187,6 +188,97 @@ async function main() {
   }
 
   console.log('✅ Products & initial stock movements seeded');
+
+  // 4. Seed Challans (Draft, Confirmed, Cancelled)
+  const p1 = createdProductsMap.get('PRD-STL-001')!;
+  const p2 = createdProductsMap.get('PRD-SAF-002')!;
+
+  const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+
+  // Challan 1: DRAFT
+  await prisma.challan.upsert({
+    where: { challanNumber: `CHN-${today}-0001` },
+    update: {},
+    create: {
+      challanNumber: `CHN-${today}-0001`,
+      customerId: customer1.id,
+      status: ChallanStatus.DRAFT,
+      totalAmount: new Prisma.Decimal(1450.00 * 5 + 350.50 * 10),
+      createdById: salesUser.id,
+      items: {
+        create: [
+          {
+            productId: p1.id,
+            productName: p1.name,
+            sku: p1.sku,
+            unitPrice: p1.unitPrice,
+            quantity: 5,
+            lineTotal: new Prisma.Decimal(1450.00 * 5),
+          },
+          {
+            productId: p2.id,
+            productName: p2.name,
+            sku: p2.sku,
+            unitPrice: p2.unitPrice,
+            quantity: 10,
+            lineTotal: new Prisma.Decimal(350.50 * 10),
+          },
+        ],
+      },
+    },
+  });
+
+  // Challan 2: CONFIRMED
+  await prisma.challan.upsert({
+    where: { challanNumber: `CHN-${today}-0002` },
+    update: {},
+    create: {
+      challanNumber: `CHN-${today}-0002`,
+      customerId: customer2.id,
+      status: ChallanStatus.CONFIRMED,
+      totalAmount: new Prisma.Decimal(1450.00 * 2),
+      createdById: salesUser.id,
+      items: {
+        create: [
+          {
+            productId: p1.id,
+            productName: p1.name,
+            sku: p1.sku,
+            unitPrice: p1.unitPrice,
+            quantity: 2,
+            lineTotal: new Prisma.Decimal(1450.00 * 2),
+          },
+        ],
+      },
+    },
+  });
+
+  // Challan 3: CANCELLED
+  await prisma.challan.upsert({
+    where: { challanNumber: `CHN-${today}-0003` },
+    update: {},
+    create: {
+      challanNumber: `CHN-${today}-0003`,
+      customerId: customer3.id,
+      status: ChallanStatus.CANCELLED,
+      totalAmount: new Prisma.Decimal(350.50 * 5),
+      createdById: salesUser.id,
+      items: {
+        create: [
+          {
+            productId: p2.id,
+            productName: p2.name,
+            sku: p2.sku,
+            unitPrice: p2.unitPrice,
+            quantity: 5,
+            lineTotal: new Prisma.Decimal(350.50 * 5),
+          },
+        ],
+      },
+    },
+  });
+
+  console.log('✅ Sales Challans (Draft, Confirmed, Cancelled) seeded');
   console.log('🎉 Comprehensive database seed finished successfully!');
 }
 

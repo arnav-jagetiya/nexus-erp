@@ -733,6 +733,255 @@
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "Challans",
+			"item": [
+				{
+					"name": "Create Draft Challan",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customerId\": \"{{customerId}}\",\n  \"items\": [\n    {\n      \"productId\": \"{{productId}}\",\n      \"quantity\": 5\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/challans",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"challans"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Challans",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/challans?page=1&limit=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"challans"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Search & Filter Challans",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/challans?search=CHN&status=DRAFT",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"challans"
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "CHN"
+								},
+								{
+									"key": "status",
+									"value": "DRAFT"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Challan Detail",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/challans/{{challanId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"challans",
+								"{{challanId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Draft Challan",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"items\": [\n    {\n      \"productId\": \"{{productId}}\",\n      \"quantity\": 8\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/challans/{{challanId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"challans",
+								"{{challanId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Confirm Challan",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/challans/{{challanId}}/confirm",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"challans",
+								"{{challanId}}",
+								"confirm"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cancel Draft Challan",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/challans/{{challanId}}/cancel",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"challans",
+								"{{challanId}}",
+								"cancel"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Confirm Insufficient Stock (409 Test)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/challans/{{challanIdWithHighQty}}/confirm",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"challans",
+								"{{challanIdWithHighQty}}",
+								"confirm"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Invalid Status Transition (409 Test)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/challans/{{alreadyConfirmedChallanId}}/confirm",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"challans",
+								"{{alreadyConfirmedChallanId}}",
+								"confirm"
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		}
 	],
 	"variable": [
@@ -750,6 +999,10 @@
 		},
 		{
 			"key": "productId",
+			"value": ""
+		},
+		{
+			"key": "challanId",
 			"value": ""
 		}
 	]
