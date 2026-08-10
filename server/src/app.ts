@@ -4,7 +4,11 @@ import { env } from './config/env.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { ApiError } from './utils/apiError.js';
 import { ApiResponse } from './utils/apiResponse.js';
+
 import authRoutes from './modules/auth/auth.routes.js';
+import customerRoutes from './modules/customers/customer.routes.js';
+import productRoutes from './modules/products/product.routes.js';
+import inventoryRoutes from './modules/inventory/inventory.routes.js';
 
 const app = express();
 
@@ -34,6 +38,9 @@ app.get('/api/health', (req, res) => {
 
 // API Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/customers', customerRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/inventory', inventoryRoutes);
 
 // Catch-all 404 Route Handler
 app.use('*', (req, res, next) => {
