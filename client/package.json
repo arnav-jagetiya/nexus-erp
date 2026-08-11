@@ -1,6 +1,7 @@
 {
   "name": "nexus-erp-client",
   "private": true,
+  "author": "Arnav Jagetiya",
   "version": "1.0.0",
   "type": "module",
   "scripts": {

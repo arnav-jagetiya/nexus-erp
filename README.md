@@ -1,13 +1,13 @@
 # NEXUS — Mini ERP + CRM Operations Portal
 
-> Full-stack internal operations portal built for wholesale and distribution businesses.
+> Full-stack internal operations portal built for wholesale and distribution businesses. Built by **Arnav Jagetiya**.
 
 ---
 
 ## Technical Stack
 
 - **Frontend**: React 18, TypeScript, Vite, React Router v6, TanStack Query v5, Axios, Tailwind CSS v4
-- **Backend**: Node.js, Express.js, TypeScript, Prisma ORM 5+, PostgreSQL (Neon serverless), JWT, bcrypt, Zod
+- **Backend**: Node.js, Express.js, TypeScript, Prisma ORM 5+, PostgreSQL, JWT, bcrypt, Zod
 - **Architecture**: Monorepo (`/client` + `/server`), REST API, Stateless JWT Auth, Server-side RBAC
 
 ---
@@ -57,7 +57,7 @@ nexus-erp/
 
 ### 1. Prerequisites
 - Node.js 18+ or 20+
-- PostgreSQL database (or Neon serverless instance)
+- PostgreSQL 17 (or compatible version) running locally on port 5432
 
 ### 2. Backend Setup (`/server`)
 
@@ -68,7 +68,9 @@ npm install
 # Copy environment variables
 cp ../.env.example .env
 
-# Generate Prisma Client & Run Migrations
+# 1. Ensure local PostgreSQL is running and you have created a database named 'nexus_erp'
+# 2. Configure server/.env with your local database credentials
+# 3. Generate Prisma Client & Run Migrations
 npx prisma generate
 npx prisma migrate dev --name init
 
@@ -82,7 +84,11 @@ npm run dev
 Server runs on: `http://localhost:4000`  
 Health check endpoint: `GET http://localhost:4000/api/health`
 
-### 3. Frontend Setup (`/client`)
+### 3. Verification
+
+You can import the Postman collection (`nexus-erp.postman_collection.json`) to test API endpoints directly.
+
+### 4. Frontend Setup (`/client`)
 
 ```bash
 cd client
@@ -101,4 +107,4 @@ Client runs on: `http://localhost:5173`
 
 ## License
 
-Internal Enterprise Operations System. All rights reserved.
+Internal Enterprise Operations System. Built by Arnav Jagetiya. All rights reserved.

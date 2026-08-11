@@ -187,7 +187,7 @@ export function LoginPage() {
 
       {/* Footer */}
       <div className="text-center text-xs font-mono text-content-tertiary max-w-6xl w-full mx-auto">
-        NEXUS Enterprise ERP & CRM Operations System &copy; 2026
+        NEXUS ERP &copy; 2026 &mdash; Built by Arnav Jagetiya
       </div>
     </div>
   );

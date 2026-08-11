@@ -14,26 +14,26 @@ async function main() {
 
   const adminUser = await prisma.user.upsert({
     where: { email: 'admin@nexus.com' },
-    update: { name: 'Priya Sharma', role: UserRole.ADMIN, password: passwordHash, isActive: true },
-    create: { email: 'admin@nexus.com', name: 'Priya Sharma', role: UserRole.ADMIN, password: passwordHash },
+    update: { name: 'Arnav Jagetiya', role: UserRole.ADMIN, password: passwordHash, isActive: true },
+    create: { email: 'admin@nexus.com', name: 'Arnav Jagetiya', role: UserRole.ADMIN, password: passwordHash },
   });
 
   const salesUser = await prisma.user.upsert({
     where: { email: 'sales@nexus.com' },
-    update: { name: 'Rahul Verma', role: UserRole.SALES, password: salesPasswordHash, isActive: true },
-    create: { email: 'sales@nexus.com', name: 'Rahul Verma', role: UserRole.SALES, password: salesPasswordHash },
+    update: { name: 'Sales Demo User', role: UserRole.SALES, password: salesPasswordHash, isActive: true },
+    create: { email: 'sales@nexus.com', name: 'Sales Demo User', role: UserRole.SALES, password: salesPasswordHash },
   });
 
   const warehouseUser = await prisma.user.upsert({
     where: { email: 'warehouse@nexus.com' },
-    update: { name: 'Deepak Patel', role: UserRole.WAREHOUSE, password: warehousePasswordHash, isActive: true },
-    create: { email: 'warehouse@nexus.com', name: 'Deepak Patel', role: UserRole.WAREHOUSE, password: warehousePasswordHash },
+    update: { name: 'Warehouse Demo User', role: UserRole.WAREHOUSE, password: warehousePasswordHash, isActive: true },
+    create: { email: 'warehouse@nexus.com', name: 'Warehouse Demo User', role: UserRole.WAREHOUSE, password: warehousePasswordHash },
   });
 
   const accountsUser = await prisma.user.upsert({
     where: { email: 'accounts@nexus.com' },
-    update: { name: 'Ananya Gupta', role: UserRole.ACCOUNTS, password: accountsPasswordHash, isActive: true },
-    create: { email: 'accounts@nexus.com', name: 'Ananya Gupta', role: UserRole.ACCOUNTS, password: accountsPasswordHash },
+    update: { name: 'Accounts Demo User', role: UserRole.ACCOUNTS, password: accountsPasswordHash, isActive: true },
+    create: { email: 'accounts@nexus.com', name: 'Accounts Demo User', role: UserRole.ACCOUNTS, password: accountsPasswordHash },
   });
 
   console.log('✅ Users seeded (Admin, Sales, Warehouse, Accounts)');

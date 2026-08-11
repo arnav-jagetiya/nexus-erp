@@ -1,6 +1,7 @@
 {
   "name": "nexus-erp-server",
   "version": "1.0.0",
+  "author": "Arnav Jagetiya",
   "private": true,
   "main": "dist/index.js",
   "scripts": {

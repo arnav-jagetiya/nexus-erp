@@ -9,7 +9,7 @@ This guide walks you through setting up and running the NEXUS Mini ERP + CRM Ope
 Ensure you have the following installed:
 - **Node.js**: v18.0.0 or higher
 - **npm**: v9.0.0 or higher
-- **PostgreSQL**: Local instance or Neon Serverless PostgreSQL connection string
+- **PostgreSQL**: PostgreSQL 17 (or compatible version) running locally on port 5432
 
 ---
 
@@ -22,8 +22,9 @@ Create `.env` files in both root and `server/` directories:
 PORT=4000
 NODE_ENV=development
 
-DATABASE_URL="postgresql://user:password@host:5432/nexus?sslmode=require"
-DIRECT_URL="postgresql://user:password@host:5432/nexus?sslmode=require"
+# Database Configuration (Local PostgreSQL)
+# Create a database named "nexus_erp" before running migrations.
+DATABASE_URL="postgresql://postgres:<PASSWORD>@localhost:5432/nexus_erp"
 
 JWT_SECRET="nexus-super-secret-jwt-key-minimum-32-characters-long"
 JWT_EXPIRES_IN="24h"
