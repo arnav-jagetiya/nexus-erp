@@ -73,5 +73,5 @@ The React SPA will run on `http://localhost:5173`.
 ## 5. Verification
 
 1. Access `http://localhost:5173/login` in your browser.
-2. Click any of the quick-fill test role buttons (e.g. Admin `admin@nexus.com` / `Admin@123`).
+2.Use the seeded demonstration accounts listed below and enter the credentials manually on the Login page.(e.g. Admin `admin@nexus.com` / `Admin@123`).
 3. Click **Sign In** to log into the authenticated dashboard.

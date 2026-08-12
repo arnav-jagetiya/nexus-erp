@@ -7,15 +7,8 @@ import { parsePaginationParams } from '../../utils/pagination.js';
 export class InventoryController {
   static async getOverview(req: Request, res: Response, next: NextFunction) {
     try {
-      const pagination = parsePaginationParams(req);
-      const filters = {
-        search: req.query.search as string,
-        category: req.query.category as string,
-        stockStatus: req.query.stockStatus as StockStatus,
-      };
-
-      const result = await InventoryService.getInventoryOverview(pagination, filters);
-      return ApiResponse.paginated(res, result.data, result.meta, 'Inventory overview fetched successfully');
+      const result = await InventoryService.getInventoryOverview();
+      return ApiResponse.success(res, result, 'Inventory overview fetched successfully');
     } catch (error) {
       next(error);
     }

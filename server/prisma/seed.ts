@@ -1,4 +1,4 @@
-import { PrismaClient, UserRole, CustomerType, CustomerStatus, MovementType, ChallanStatus, Prisma } from '@prisma/client';
+import { PrismaClient, UserRole, AccountStatus, CustomerType, CustomerStatus, MovementType, ChallanStatus, Prisma } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
@@ -7,6 +7,8 @@ async function main() {
   console.log('🌱 Starting comprehensive database seed for NEXUS ERP...');
 
   // 1. Seed Users
+  // Demo credentials for local development and evaluation only.
+  // Do not use these credentials in production.
   const passwordHash = await bcrypt.hash('Admin@123', 10);
   const salesPasswordHash = await bcrypt.hash('Sales@123', 10);
   const warehousePasswordHash = await bcrypt.hash('Warehouse@123', 10);
@@ -14,26 +16,26 @@ async function main() {
 
   const adminUser = await prisma.user.upsert({
     where: { email: 'admin@nexus.com' },
-    update: { name: 'Arnav Jagetiya', role: UserRole.ADMIN, password: passwordHash, isActive: true },
-    create: { email: 'admin@nexus.com', name: 'Arnav Jagetiya', role: UserRole.ADMIN, password: passwordHash },
+    update: { name: 'Arnav Jagetiya', role: UserRole.ADMIN, password: passwordHash, status: AccountStatus.ACTIVE, isPrimaryAdmin: true },
+    create: { email: 'admin@nexus.com', name: 'Arnav Jagetiya', role: UserRole.ADMIN, password: passwordHash, status: AccountStatus.ACTIVE, isPrimaryAdmin: true },
   });
 
   const salesUser = await prisma.user.upsert({
     where: { email: 'sales@nexus.com' },
-    update: { name: 'Sales Demo User', role: UserRole.SALES, password: salesPasswordHash, isActive: true },
-    create: { email: 'sales@nexus.com', name: 'Sales Demo User', role: UserRole.SALES, password: salesPasswordHash },
+    update: { name: 'Sales Demo User', role: UserRole.SALES, password: salesPasswordHash, status: AccountStatus.ACTIVE },
+    create: { email: 'sales@nexus.com', name: 'Sales Demo User', role: UserRole.SALES, password: salesPasswordHash, status: AccountStatus.ACTIVE },
   });
 
   const warehouseUser = await prisma.user.upsert({
     where: { email: 'warehouse@nexus.com' },
-    update: { name: 'Warehouse Demo User', role: UserRole.WAREHOUSE, password: warehousePasswordHash, isActive: true },
-    create: { email: 'warehouse@nexus.com', name: 'Warehouse Demo User', role: UserRole.WAREHOUSE, password: warehousePasswordHash },
+    update: { name: 'Warehouse Demo User', role: UserRole.WAREHOUSE, password: warehousePasswordHash, status: AccountStatus.ACTIVE },
+    create: { email: 'warehouse@nexus.com', name: 'Warehouse Demo User', role: UserRole.WAREHOUSE, password: warehousePasswordHash, status: AccountStatus.ACTIVE },
   });
 
   const accountsUser = await prisma.user.upsert({
     where: { email: 'accounts@nexus.com' },
-    update: { name: 'Accounts Demo User', role: UserRole.ACCOUNTS, password: accountsPasswordHash, isActive: true },
-    create: { email: 'accounts@nexus.com', name: 'Accounts Demo User', role: UserRole.ACCOUNTS, password: accountsPasswordHash },
+    update: { name: 'Accounts Demo User', role: UserRole.ACCOUNTS, password: accountsPasswordHash, status: AccountStatus.ACTIVE },
+    create: { email: 'accounts@nexus.com', name: 'Accounts Demo User', role: UserRole.ACCOUNTS, password: accountsPasswordHash, status: AccountStatus.ACTIVE },
   });
 
   console.log('✅ Users seeded (Admin, Sales, Warehouse, Accounts)');

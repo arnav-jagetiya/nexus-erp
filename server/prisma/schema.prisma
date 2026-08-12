@@ -16,6 +16,18 @@ enum UserRole {
   ACCOUNTS
 }
 
+enum ApprovalStatus {
+  APPROVED
+  PENDING
+  REJECTED
+}
+
+enum AccountStatus {
+  ACTIVE
+  SUSPENDED
+  REVOKED
+}
+
 enum CustomerType {
   RETAIL
   WHOLESALE
@@ -42,14 +54,25 @@ enum MovementType {
 // ─── Models ───────────────────────────────────────────────
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String
-  name      String
-  role      UserRole
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id             String         @id @default(cuid())
+  email          String         @unique
+  password       String
+  name           String
+  role           UserRole
+  requestedRole  UserRole?
+  approvalStatus ApprovalStatus @default(APPROVED)
+  status         AccountStatus  @default(ACTIVE)
+  isPrimaryAdmin Boolean        @default(false)
+  
+  suspendedAt      DateTime?
+  suspendedUntil   DateTime?
+  suspensionReason String?
+
+  revokedAt        DateTime?
+  revocationReason String?
+
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
 
   stockMovements StockMovement[]
   challans       Challan[]

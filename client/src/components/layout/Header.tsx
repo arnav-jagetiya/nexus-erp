@@ -1,17 +1,30 @@
 import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Sun, Moon, Monitor, LogOut, User as UserIcon, ChevronDown } from 'lucide-react';
+import { Sun, Moon, Monitor, LogOut, User as UserIcon, ChevronDown, Menu } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useTheme } from '../../hooks/useTheme';
+import { useSidebar } from '../../providers/SidebarProvider';
 import { Badge } from '../ui/Badge';
 import { Theme } from '../../types';
 
 export function Header() {
   const { user, logout } = useAuth();
   const { theme, setTheme } = useTheme();
+  const { toggleMobile } = useSidebar();
   const location = useLocation();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isThemeOpen, setIsThemeOpen] = useState(false);
+
+  React.useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsThemeOpen(false);
+        setIsProfileOpen(false);
+      }
+    };
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, []);
 
   const getBreadcrumbTitle = (pathname: string) => {
     if (pathname.includes('/customers')) return 'Customers CRM';
@@ -39,21 +52,42 @@ export function Header() {
 
   return (
     <header className="h-16 border-b border-line-primary bg-surface-secondary px-6 flex items-center justify-between sticky top-0 z-30">
+      {/* Dropdown Backdrop */}
+      {(isThemeOpen || isProfileOpen) && (
+        <div 
+          className="fixed inset-0 z-40"
+          onClick={() => {
+            setIsThemeOpen(false);
+            setIsProfileOpen(false);
+          }}
+        />
+      )}
+
       {/* Breadcrumb / Page Title */}
-      <div className="flex items-center gap-3">
-        <span className="text-xs font-mono text-content-tertiary">SYS //</span>
-        <h1 className="text-base font-semibold text-content-primary">
+      <div className="flex items-center gap-2 sm:gap-3 truncate pr-4">
+        <button 
+          onClick={toggleMobile}
+          className="md:hidden p-1.5 -ml-2 rounded-md hover:bg-surface-tertiary text-content-secondary transition-colors"
+          title="Open menu"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+        <span className="text-xs font-mono text-content-tertiary hidden sm:inline">SYS //</span>
+        <h1 className="text-sm sm:text-base font-semibold text-content-primary truncate">
           {getBreadcrumbTitle(location.pathname)}
         </h1>
       </div>
 
       {/* Right Action Controls */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 flex-shrink-0 relative z-50">
         {/* Theme Selector Menu */}
         <div className="relative">
           <button
-            onClick={() => setIsThemeOpen(!isThemeOpen)}
-            className="p-2 rounded-md border border-line-primary bg-surface-primary hover:bg-surface-tertiary text-content-secondary transition-colors"
+            onClick={() => {
+              setIsProfileOpen(false);
+              setIsThemeOpen(!isThemeOpen);
+            }}
+            className="p-1.5 sm:p-2 rounded-md border border-line-primary bg-surface-primary hover:bg-surface-tertiary text-content-secondary transition-colors"
             title="Toggle theme"
           >
             {theme === 'light' ? (
@@ -66,7 +100,7 @@ export function Header() {
           </button>
 
           {isThemeOpen && (
-            <div className="absolute right-0 mt-2 w-36 rounded-md border border-line-primary bg-surface-secondary shadow-lg py-1 z-50">
+            <div className="absolute right-0 top-full mt-2 w-36 rounded-md border border-line-primary bg-surface-secondary shadow-spatial-lg py-1 z-50 animate-in fade-in slide-in-from-top-2">
               <button
                 onClick={() => {
                   setTheme('light');
@@ -104,15 +138,18 @@ export function Header() {
           )}
         </div>
 
-        <div className="h-6 w-px bg-line-primary"></div>
+        <div className="h-6 w-px bg-line-primary hidden sm:block"></div>
 
         {/* User Profile Menu */}
         <div className="relative">
           <button
-            onClick={() => setIsProfileOpen(!isProfileOpen)}
-            className="flex items-center gap-2.5 py-1.5 px-2 rounded-md hover:bg-surface-tertiary transition-colors"
+            onClick={() => {
+              setIsThemeOpen(false);
+              setIsProfileOpen(!isProfileOpen);
+            }}
+            className="flex items-center gap-2.5 py-1 px-1 sm:py-1.5 sm:px-2 rounded-md hover:bg-surface-tertiary transition-colors"
           >
-            <div className="w-8 h-8 rounded-md bg-brand-subtle border border-brand/20 flex items-center justify-center text-brand font-semibold text-xs">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-md bg-brand-subtle border border-brand/20 flex items-center justify-center text-brand font-semibold text-xs shrink-0">
               {user?.name?.slice(0, 2).toUpperCase() || 'NX'}
             </div>
             <div className="text-left hidden sm:block">
@@ -127,8 +164,8 @@ export function Header() {
           </button>
 
           {isProfileOpen && (
-            <div className="absolute right-0 mt-2 w-56 rounded-md border border-line-primary bg-surface-secondary shadow-lg py-2 z-50">
-              <div className="px-4 py-2 border-b border-line-primary">
+            <div className="absolute right-0 top-full mt-2 w-56 rounded-md border border-line-primary bg-surface-secondary shadow-spatial-lg py-2 z-50 animate-in fade-in slide-in-from-top-2">
+              <div className="px-4 py-2 border-b border-line-primary mb-1">
                 <p className="text-xs font-semibold text-content-primary">{user?.name}</p>
                 <p className="text-xs font-mono text-content-tertiary truncate">{user?.email}</p>
               </div>

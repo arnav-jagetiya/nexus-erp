@@ -13,48 +13,41 @@ export class InventoryService {
     return 'HEALTHY';
   }
 
-  static async getInventoryOverview(
-    pagination: PaginationParams,
-    filters: { search?: string; category?: string; stockStatus?: StockStatus }
-  ) {
-    const where: Prisma.ProductWhereInput = {};
+  static async getInventoryOverview() {
+    const products = await prisma.product.findMany();
+    
+    let totalProducts = products.length;
+    let lowStockProducts = 0;
+    let outOfStockProducts = 0;
 
-    if (filters.category && filters.category.trim() !== '') {
-      where.category = { equals: filters.category.trim(), mode: 'insensitive' };
+    for (const p of products) {
+      const status = this.getStockStatus(p.currentStock, p.minStockAlert);
+      if (status === 'CRITICAL') outOfStockProducts++;
+      if (status === 'LOW') lowStockProducts++;
     }
 
-    if (filters.search && filters.search.trim() !== '') {
-      const query = filters.search.trim();
-      where.OR = [
-        { name: { contains: query, mode: 'insensitive' } },
-        { sku: { contains: query, mode: 'insensitive' } },
-        { location: { contains: query, mode: 'insensitive' } },
-      ];
-    }
+    const totalMovements = await prisma.stockMovement.count();
 
-    // Fetch products
-    const products = await prisma.product.findMany({
-      where,
-      orderBy: { name: 'asc' },
+    const recentMovements = await prisma.stockMovement.findMany({
+      take: 10,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        product: {
+          select: { id: true, name: true, sku: true }
+        },
+        createdBy: {
+          select: { id: true, name: true, email: true }
+        }
+      }
     });
 
-    // Map derived stockStatus
-    let enriched = products.map((p) => ({
-      ...p,
-      unitPrice: Number(p.unitPrice),
-      stockStatus: this.getStockStatus(p.currentStock, p.minStockAlert),
-    }));
-
-    // Filter in-memory by derived stockStatus if requested
-    if (filters.stockStatus) {
-      enriched = enriched.filter((p) => p.stockStatus === filters.stockStatus);
-    }
-
-    const total = enriched.length;
-    const paginatedItems = enriched.slice(pagination.skip, pagination.skip + pagination.limit);
-    const meta = buildPaginationMeta(pagination.page, pagination.limit, total);
-
-    return { data: paginatedItems, meta };
+    return {
+      totalProducts,
+      lowStockProducts,
+      outOfStockProducts,
+      totalMovements,
+      recentMovements
+    };
   }
 
   static async getMovements(

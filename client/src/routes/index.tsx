@@ -3,16 +3,29 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { ProtectedRoute } from './ProtectedRoute';
 import { RoleGuard } from './RoleGuard';
 import { AppLayout } from '../components/layout/AppLayout';
+import { LandingPage } from '../features/landing/LandingPage';
 import { LoginPage } from '../features/auth/LoginPage';
+import { RegisterPage } from '../features/auth/RegisterPage';
+import { ForgotPasswordPage } from '../features/auth/ForgotPasswordPage';
+import { ResetPasswordPage } from '../features/auth/ResetPasswordPage';
 import { DashboardPage } from '../features/dashboard/DashboardPage';
+import { UsersPage } from '../features/users/UsersPage';
+import { SettingsPage } from '../features/settings/SettingsPage';
 import { ModulePlaceholder } from '../features/placeholder/ModulePlaceholder';
+import { CustomerRoutes } from '../features/customers/CustomerRoutes';
+import { ProductRoutes } from '../features/products/ProductRoutes';
+import { InventoryRoutes } from '../features/inventory/InventoryRoutes';
+import { ChallanRoutes } from '../features/challans/ChallanRoutes';
 
 export function AppRoutes() {
   return (
     <Routes>
       {/* Public Routes */}
-      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
 
       {/* Authenticated App Shell */}
       <Route
@@ -26,16 +39,12 @@ export function AppRoutes() {
         <Route index element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<DashboardPage />} />
 
-        {/* Placeholder Routes for Phase 2 Feature Modules */}
+        {/* Placeholder Routes for Phase 3 Feature Modules */}
         <Route
           path="customers/*"
           element={
             <RoleGuard roles={['ADMIN', 'SALES', 'ACCOUNTS']}>
-              <ModulePlaceholder
-                title="Customer CRM"
-                description="Manage customer accounts, business contacts, GST information, follow-up logs, and customer status lifecycles."
-                moduleKey="MOD_CUSTOMERS_CRM"
-              />
+              <CustomerRoutes />
             </RoleGuard>
           }
         />
@@ -44,11 +53,7 @@ export function AppRoutes() {
           path="products/*"
           element={
             <RoleGuard roles={['ADMIN', 'SALES', 'WAREHOUSE', 'ACCOUNTS']}>
-              <ModulePlaceholder
-                title="Products Catalog"
-                description="Manage product definitions, SKUs, pricing, categories, and warehouse storage locations."
-                moduleKey="MOD_PRODUCTS_CATALOG"
-              />
+              <ProductRoutes />
             </RoleGuard>
           }
         />
@@ -56,12 +61,8 @@ export function AppRoutes() {
         <Route
           path="inventory/*"
           element={
-            <RoleGuard roles={['ADMIN', 'SALES', 'WAREHOUSE', 'ACCOUNTS']}>
-              <ModulePlaceholder
-                title="Inventory & Stock Movements"
-                description="Track real-time stock levels, record IN movements, monitor low-stock alerts, and audit stock history logs."
-                moduleKey="MOD_INVENTORY_LOGS"
-              />
+            <RoleGuard roles={['ADMIN', 'WAREHOUSE', 'SALES', 'ACCOUNTS']}>
+              <InventoryRoutes />
             </RoleGuard>
           }
         />
@@ -70,29 +71,28 @@ export function AppRoutes() {
           path="challans/*"
           element={
             <RoleGuard roles={['ADMIN', 'SALES', 'WAREHOUSE', 'ACCOUNTS']}>
-              <ModulePlaceholder
-                title="Sales Challans"
-                description="Create draft sales challans, perform atomic stock deduction upon confirmation, and store product price snapshots."
-                moduleKey="MOD_SALES_CHALLANS"
-              />
+              <ChallanRoutes />
             </RoleGuard>
           }
         />
 
         <Route
           path="settings"
+          element={<SettingsPage />}
+        />
+
+        <Route
+          path="users"
           element={
-            <ModulePlaceholder
-              title="System Settings"
-              description="Configure workspace preferences, user role assignments, theme settings, and system parameters."
-              moduleKey="MOD_SETTINGS"
-            />
+            <RoleGuard roles={['ADMIN']}>
+              <UsersPage />
+            </RoleGuard>
           }
         />
       </Route>
 
       {/* Fallback Catch-all */}
-      <Route path="*" element={<Navigate to="/login" replace />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }

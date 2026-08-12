@@ -1,36 +1,29 @@
 import React from 'react';
+import { cn } from '../../utils/cn';
 
-interface BadgeProps {
-  children: React.ReactNode;
-  variant?: 'default' | 'success' | 'warning' | 'danger' | 'info' | 'neutral';
+interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
+  variant?: 'info' | 'success' | 'warning' | 'danger' | 'default';
   size?: 'sm' | 'md';
-  className?: string;
 }
 
-export function Badge({
-  children,
-  variant = 'default',
-  size = 'md',
-  className = '',
-}: BadgeProps) {
-  const baseStyles = 'inline-flex items-center font-mono font-medium rounded uppercase tracking-wider';
+export function Badge({ children, variant = 'default', size = 'sm', className, ...props }: BadgeProps) {
+  const baseStyles = 'inline-flex items-center font-mono font-semibold tracking-wider rounded border uppercase';
 
   const variants = {
-    default: 'bg-surface-tertiary text-content-secondary border border-line-primary',
-    success: 'bg-status-success-bg text-status-success border border-status-success/20',
-    warning: 'bg-status-warning-bg text-status-warning border border-status-warning/20',
-    danger: 'bg-status-danger-bg text-status-danger border border-status-danger/20',
-    info: 'bg-status-info-bg text-status-info border border-status-info/20',
-    neutral: 'bg-surface-tertiary text-content-tertiary border border-line-primary',
+    default: 'bg-surface-tertiary text-content-secondary border-line-primary',
+    info: 'bg-status-info-bg text-status-info border-status-info/20',
+    success: 'bg-status-success-bg text-status-success border-status-success/20',
+    warning: 'bg-status-warning-bg text-status-warning border-status-warning/20',
+    danger: 'bg-status-danger-bg text-status-danger border-status-danger/20',
   };
 
   const sizes = {
-    sm: 'px-1.5 py-0.5 text-[10px]',
-    md: 'px-2 py-0.5 text-xs',
+    sm: 'px-1.5 py-0.5 text-[9px]',
+    md: 'px-2 py-1 text-[11px]',
   };
 
   return (
-    <span className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${className}`}>
+    <span className={cn(baseStyles, variants[variant], sizes[size], className)} {...props}>
       {children}
     </span>
   );

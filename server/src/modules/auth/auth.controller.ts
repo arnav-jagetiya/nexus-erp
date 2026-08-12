@@ -12,6 +12,31 @@ export class AuthController {
     }
   }
 
+  static async register(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await AuthService.register(req.body);
+      return ApiResponse.success(res, result, 'Registration successful');
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async forgotPassword(req: Request, res: Response, next: NextFunction) {
+    return ApiResponse.success(
+      res,
+      null,
+      'Password recovery is not configured for this deployment. Please contact your system administrator.'
+    );
+  }
+
+  static async resetPassword(req: Request, res: Response, next: NextFunction) {
+    return ApiResponse.success(
+      res,
+      null,
+      'Password recovery is not configured for this deployment. Please contact your system administrator.'
+    );
+  }
+
   static async me(req: Request, res: Response, next: NextFunction) {
     try {
       const userId = req.user!.id;

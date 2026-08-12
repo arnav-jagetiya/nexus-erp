@@ -10,6 +10,7 @@ import customerRoutes from './modules/customers/customer.routes.js';
 import productRoutes from './modules/products/product.routes.js';
 import inventoryRoutes from './modules/inventory/inventory.routes.js';
 import challanRoutes from './modules/challans/challan.routes.js';
+import userRoutes from './modules/users/users.routes.js';
 
 const app = express();
 
@@ -43,6 +44,7 @@ app.use('/api/customers', customerRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/challans', challanRoutes);
+app.use('/api/users', userRoutes);
 
 // Catch-all 404 Route Handler
 app.use('*', (req, res, next) => {
