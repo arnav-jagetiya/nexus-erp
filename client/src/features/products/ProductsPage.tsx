@@ -22,11 +22,21 @@ export function ProductsPage() {
 
   const { data, isLoading, isError } = useProducts({
     search: search || undefined,
-    category: categoryFilter || undefined,
-    lowStock: lowStockFilter || undefined,
   });
 
-  const products = data?.data || [];
+  const allLoadedProducts = data?.data || [];
+  
+  const uniqueCategories = Array.from(new Set(allLoadedProducts.map((p: ProductDTO) => p.category))).filter(Boolean).sort();
+
+  const products = allLoadedProducts.filter((p: ProductDTO) => {
+    if (categoryFilter && p.category !== categoryFilter) return false;
+    if (lowStockFilter) {
+      const isOutOfStock = p.currentStock === 0;
+      const isLowStock = !isOutOfStock && p.currentStock < p.minStockAlert;
+      if (!isLowStock) return false;
+    }
+    return true;
+  });
   const canCreate = user?.role === 'ADMIN' || user?.role === 'WAREHOUSE';
 
   return (
@@ -60,13 +70,16 @@ export function ProductsPage() {
             
             <div className="flex items-center gap-2 flex-wrap">
               <Filter className="w-4 h-4 text-content-tertiary hidden sm:block" />
-              <input 
-                type="text" 
-                placeholder="Filter category..." 
+              <select 
                 value={categoryFilter}
                 onChange={(e) => setCategoryFilter(e.target.value)}
                 className="w-full sm:w-40 px-3 py-2 bg-surface-secondary border border-line-secondary rounded-md text-sm text-content-primary focus:outline-none focus:border-brand/50 transition-colors"
-              />
+              >
+                <option value="">All Categories</option>
+                {uniqueCategories.map(cat => (
+                  <option key={cat as string} value={cat as string}>{cat as string}</option>
+                ))}
+              </select>
               <button
                 type="button"
                 onClick={() => setLowStockFilter(!lowStockFilter)}
@@ -146,7 +159,7 @@ export function ProductsPage() {
               ) : (
                 products.map((row: ProductDTO) => {
                   const isOutOfStock = row.currentStock === 0;
-                  const isLowStock = !isOutOfStock && row.currentStock <= row.minStockAlert;
+                  const isLowStock = !isOutOfStock && row.currentStock < row.minStockAlert;
                   
                   return (
                     <TableRow key={row.id} className="group cursor-pointer" onClick={() => navigate(row.id)}>

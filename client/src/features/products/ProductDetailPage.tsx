@@ -43,7 +43,7 @@ export function ProductDetailPage() {
   }
 
   const isOutOfStock = product.currentStock === 0;
-  const isLowStock = !isOutOfStock && product.currentStock <= product.minStockAlert;
+  const isLowStock = !isOutOfStock && product.currentStock < product.minStockAlert;
 
   return (
     <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-7xl mx-auto w-full pb-12">
@@ -100,27 +100,27 @@ export function ProductDetailPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 flex flex-col gap-6">
-          <DataPanel className="p-6">
-            <h3 className="text-sm font-semibold text-content-primary mb-4 flex items-center gap-2">
+          <DataPanel className="p-6 md:p-8">
+            <h3 className="text-sm font-semibold text-content-primary mb-6 flex items-center gap-2">
               <Package className="w-4 h-4 text-content-secondary" /> Inventory Profile
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="flex flex-col gap-1">
-                <span className="text-xs text-content-tertiary font-mono uppercase">Minimum Stock Alert</span>
-                <span className="text-sm font-medium text-content-primary flex items-center gap-2">
-                  <AlertTriangle className="w-4 h-4 text-content-secondary" /> {product.minStockAlert} units
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="flex flex-col gap-2">
+                <span className="text-xs text-content-tertiary font-mono uppercase tracking-wider">Minimum Stock Alert</span>
+                <span className="text-base font-medium text-content-primary flex items-center gap-2.5">
+                  <AlertTriangle className="w-5 h-5 text-status-warning" /> {product.minStockAlert} units
                 </span>
               </div>
-              <div className="flex flex-col gap-1">
-                <span className="text-xs text-content-tertiary font-mono uppercase">Storage Location</span>
-                <span className="text-sm font-medium text-content-primary flex items-center gap-2">
-                  <MapPin className="w-4 h-4 text-content-secondary" /> {product.location}
+              <div className="flex flex-col gap-2">
+                <span className="text-xs text-content-tertiary font-mono uppercase tracking-wider">Storage Location</span>
+                <span className="text-base font-medium text-content-primary flex items-center gap-2.5">
+                  <MapPin className="w-5 h-5 text-brand" /> {product.location}
                 </span>
               </div>
             </div>
           </DataPanel>
 
-          <DataPanel className="flex flex-col h-full p-6">
+          <DataPanel className="flex flex-col flex-1 p-6">
             <h3 className="text-sm font-semibold text-content-primary mb-4 flex items-center gap-2 border-b border-line-primary pb-4">
               <Boxes className="w-4 h-4 text-content-secondary" /> Recent Stock Movements
             </h3>
