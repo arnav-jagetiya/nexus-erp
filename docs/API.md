@@ -1,89 +1,166 @@
-# NEXUS ERP — API Documentation
+# NEXUS ERP REST API Documentation
 
-## Base URL
-`http://localhost:4000/api`
-
----
-
-## 1. System Health
-
-### `GET /api/health`
-Check API server status.
-
----
-
-## 2. Authentication
-
-### `POST /api/auth/login`
-Authenticate user credentials and receive a 24-hour HS256 JWT token.
-
-### `GET /api/auth/me`
-Retrieve profile of currently authenticated user.
+## Table of Contents
+- [API Lifecycle Overview](#api-lifecycle-overview)
+- [Health](#health)
+- [Authentication](#authentication)
+- [Customers](#customers)
+- [Products](#products)
+- [Inventory](#inventory)
+- [Challans](#challans)
 
 ---
 
-## 3. Customer CRM (`/api/customers`)
+## API Lifecycle Overview
 
-| Method | Endpoint | Allowed Roles | Description |
-|---|---|---|---|
-| `POST` | `/api/customers` | ADMIN, SALES | Create a new customer |
-| `GET` | `/api/customers` | ADMIN, SALES, ACCOUNTS | List customers (paginated, searchable, filterable) |
-| `GET` | `/api/customers/:id` | ADMIN, SALES, ACCOUNTS | Get customer details with follow-ups |
-| `PATCH` | `/api/customers/:id` | ADMIN, SALES | Update customer information |
-| `DELETE` | `/api/customers/:id` | ADMIN | Delete customer (blocked if challans exist) |
-| `POST` | `/api/customers/:id/followups` | ADMIN, SALES | Add a follow-up note (createdBy auto-assigned) |
-| `GET` | `/api/customers/:id/followups` | ADMIN, SALES, ACCOUNTS | List customer follow-up notes |
+All API requests follow a standardized lifecycle in the backend:
+
+`Frontend` → `Axios` → `REST Endpoint (/api/*)` → `Express Router` → `Middleware (Auth & RBAC)` → `Zod Validation` → `Controller` → `Service` → `Prisma` → `PostgreSQL` → `Response` → `Frontend`
+
+- All authenticated routes require a valid JWT passed in the `Authorization` header as `Bearer <JWT_TOKEN>`.
+- The backend root `/` does **not** expose an API endpoint. Use `/api/health` to verify backend availability.
 
 ---
 
-## 4. Products Catalog (`/api/products`)
+## Health
 
-| Method | Endpoint | Allowed Roles | Description |
-|---|---|---|---|
-| `POST` | `/api/products` | ADMIN, WAREHOUSE | Create a new product (unique SKU) |
-| `GET` | `/api/products` | ADMIN, SALES, WAREHOUSE, ACCOUNTS | List products (paginated, searchable, filterable) |
-| `GET` | `/api/products/:id` | ADMIN, SALES, WAREHOUSE, ACCOUNTS | Get product details & stock info |
-| `PATCH` | `/api/products/:id` | ADMIN, WAREHOUSE | Update product metadata (**currentStock cannot be edited directly**) |
-| `DELETE` | `/api/products/:id` | ADMIN, WAREHOUSE | Delete product (blocked if stock movements/challans exist) |
+| Method | Endpoint | Authentication | Required Roles | Purpose |
+| :--- | :--- | :--- | :--- | :--- |
+| **GET** | `/api/health` | None | None | Verify API availability and environment status. |
 
 ---
 
-## 5. Inventory & Stock Movements (`/api/inventory`)
+## Authentication
 
-| Method | Endpoint | Allowed Roles | Description |
-|---|---|---|---|
-| `GET` | `/api/inventory` | ADMIN, SALES, WAREHOUSE, ACCOUNTS | Stock overview with derived status (`HEALTHY`, `LOW`, `CRITICAL`) |
-| `GET` | `/api/inventory/movements` | ADMIN, WAREHOUSE, ACCOUNTS | List stock movement history log |
-| `POST` | `/api/inventory/movements` | ADMIN, WAREHOUSE | Record manual stock movement (`IN` or `OUT`) |
+| Method | Endpoint | Authentication | Required Roles | Purpose |
+| :--- | :--- | :--- | :--- | :--- |
+| **POST** | `/api/auth/login` | None | None | Authenticate user and receive JWT. |
+| **POST** | `/api/auth/register` | None | None | Register a new user (approval pending). |
+| **GET** | `/api/auth/me` | Required | Any | Retrieve the current authenticated user's profile. |
+| **POST** | `/api/auth/forgot-password` | None | None | Mock endpoint for password recovery. |
+| **POST** | `/api/auth/reset-password` | None | None | Mock endpoint for password reset. |
+
+**Example: `POST /api/auth/login`**
+```json
+// Request Body
+{
+  "email": "admin@nexus.com",
+  "password": "your_password"
+}
+
+// Success Response
+{
+  "success": true,
+  "message": "Login successful",
+  "data": {
+    "user": {
+      "id": "cuid...",
+      "email": "admin@nexus.com",
+      "name": "Admin User",
+      "role": "ADMIN"
+    },
+    "token": "<JWT_TOKEN>"
+  }
+}
+```
 
 ---
 
-## 6. Sales Challans (`/api/challans`)
+## Customers
 
-| Method | Endpoint | Allowed Roles | Description |
-|---|---|---|---|
-| `POST` | `/api/challans` | ADMIN, SALES | Create a new DRAFT challan with product snapshots & auto-generated retry-safe number |
-| `GET` | `/api/challans` | ADMIN, SALES, WAREHOUSE, ACCOUNTS | List challans (paginated, searchable, status filter) |
-| `GET` | `/api/challans/:id` | ADMIN, SALES, WAREHOUSE, ACCOUNTS | Get challan detail with line items & snapshotted metadata |
-| `PATCH` | `/api/challans/:id` | ADMIN, SALES | Update DRAFT challan items or customer (re-snapshots updated products) |
-| `POST` | `/api/challans/:id/cancel` | ADMIN, SALES | Cancel DRAFT challan (`DRAFT -> CANCELLED`) |
-| `POST` | `/api/challans/:id/confirm` | ADMIN, SALES | Transactional confirmation (`DRAFT -> CONFIRMED`), atomic stock deduction & `OUT` movement creation |
+| Method | Endpoint | Authentication | Required Roles | Purpose |
+| :--- | :--- | :--- | :--- | :--- |
+| **GET** | `/api/customers` | Required | ADMIN, SALES, ACCOUNTS | List and search customers. |
+| **POST** | `/api/customers` | Required | ADMIN, SALES | Create a new customer profile. |
+| **GET** | `/api/customers/:id` | Required | ADMIN, SALES, ACCOUNTS | Get specific customer details (includes follow-ups). |
+| **PATCH**| `/api/customers/:id` | Required | ADMIN, SALES | Update customer profile. |
+| **DELETE**| `/api/customers/:id` | Required | ADMIN | Delete a customer. |
+| **GET** | `/api/customers/:id/followups` | Required | ADMIN, SALES, ACCOUNTS | List follow-up history for a customer. |
+| **POST** | `/api/customers/:id/followups` | Required | ADMIN, SALES | Add a follow-up note to a customer. |
 
-### Sales Challan Business Rules & Security:
-1. **Challan Numbering**: Auto-generated `CHN-YYYYMMDD-NNNN`. Optimistic retry (max 3 attempts) handles rare concurrent `P2002` collisions.
-2. **Product Snapshots**: Product `productName`, `sku`, and `unitPrice` are captured when the DRAFT is created/updated. Subsequent changes to product details do NOT alter historical challan items.
-3. **Status Machine & Valid Transitions**:
-   - `DRAFT -> CONFIRMED` (Allowed, transactional stock deduction)
-   - `DRAFT -> CANCELLED` (Allowed, no stock deduction)
-   - `CONFIRMED` and `CANCELLED` are terminal states. Attempting invalid status transitions returns `409 INVALID_STATUS_TRANSITION`.
-4. **Transactional Confirmation (`POST /api/challans/:id/confirm`)**:
-   - Executes inside a single `$transaction`.
-   - For every item in the challan, executes database-level conditional SQL:
-     ```sql
-     UPDATE products
-     SET "currentStock" = "currentStock" - $1,
-         "updatedAt" = NOW()
-     WHERE id = $2
-       AND "currentStock" >= $1
-     ```
-   - If ANY product has insufficient stock (`rowsAffected === 0`), the transaction throws `409 INSUFFICIENT_STOCK`, **rolls back completely**, creates NO `StockMovement` logs, and leaves the challan as `DRAFT`.
+**Example: `POST /api/customers`**
+```json
+// Request Body
+{
+  "name": "Jane Doe",
+  "email": "jane@example.com",
+  "mobile": "1234567890",
+  "businessName": "Doe Enterprises",
+  "customerType": "RETAIL",
+  "address": "123 Main St",
+  "status": "LEAD"
+}
+```
+
+---
+
+## Products
+
+| Method | Endpoint | Authentication | Required Roles | Purpose |
+| :--- | :--- | :--- | :--- | :--- |
+| **GET** | `/api/products` | Required | ADMIN, SALES, WAREHOUSE, ACCOUNTS | List and search products. |
+| **POST** | `/api/products` | Required | ADMIN, WAREHOUSE | Create a new product. |
+| **GET** | `/api/products/:id` | Required | ADMIN, SALES, WAREHOUSE, ACCOUNTS | Get specific product details. |
+| **PATCH**| `/api/products/:id` | Required | ADMIN, WAREHOUSE | Update product information. |
+| **DELETE**| `/api/products/:id` | Required | ADMIN, WAREHOUSE | Delete a product. |
+
+**Example: `POST /api/products`**
+```json
+// Request Body
+{
+  "name": "Steel Pipe",
+  "sku": "STL-001",
+  "category": "Hardware",
+  "unitPrice": 1450.00,
+  "minStockAlert": 30,
+  "location": "Warehouse Bay A"
+}
+```
+
+---
+
+## Inventory
+
+| Method | Endpoint | Authentication | Required Roles | Purpose |
+| :--- | :--- | :--- | :--- | :--- |
+| **GET** | `/api/inventory` | Required | ADMIN, SALES, WAREHOUSE, ACCOUNTS | Get high-level inventory overview metrics. |
+| **GET** | `/api/inventory/movements` | Required | ADMIN, WAREHOUSE, ACCOUNTS | List immutable stock movement ledger. |
+| **POST** | `/api/inventory/movements` | Required | ADMIN, WAREHOUSE | Manually adjust stock (`IN` or `OUT`). |
+
+**Example: `POST /api/inventory/movements`**
+```json
+// Request Body
+{
+  "productId": "<product_id>",
+  "quantity": 50,
+  "movementType": "IN",
+  "reason": "New supplier delivery"
+}
+```
+
+---
+
+## Challans
+
+| Method | Endpoint | Authentication | Required Roles | Purpose |
+| :--- | :--- | :--- | :--- | :--- |
+| **GET** | `/api/challans` | Required | ADMIN, SALES, WAREHOUSE, ACCOUNTS | List sales challans. |
+| **POST** | `/api/challans` | Required | ADMIN, SALES | Create a new sales challan (DRAFT status). |
+| **GET** | `/api/challans/:id` | Required | ADMIN, SALES, WAREHOUSE, ACCOUNTS | Get challan details and its line items. |
+| **PATCH**| `/api/challans/:id` | Required | ADMIN, SALES | Update a DRAFT challan. |
+| **POST** | `/api/challans/:id/confirm`| Required | ADMIN, SALES | Confirm challan (deducts stock and records movements). |
+| **POST** | `/api/challans/:id/cancel` | Required | ADMIN, SALES | Cancel a challan. |
+
+**Example: `POST /api/challans`**
+```json
+// Request Body
+{
+  "customerId": "<customer_id>",
+  "items": [
+    {
+      "productId": "<product_id>",
+      "quantity": 10
+    }
+  ]
+}
+```

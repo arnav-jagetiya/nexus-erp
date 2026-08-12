@@ -245,6 +245,11 @@ The following credentials are created when running `npm run prisma:seed`. Use th
 ## GitHub
 [https://github.com/arnav-jagetiya/nexus-erp](https://github.com/arnav-jagetiya/nexus-erp)
 
+## Documentation
+- [Architecture Documentation](docs/ARCHITECTURE.md)
+- [API Documentation](docs/API.md)
+- [Postman Collection](postman/NEXUS-ERP.postman_collection.json)
+
 ## Live Demo
 - **Frontend UI:** [https://nexus-erp-1szs.onrender.com](https://nexus-erp-1szs.onrender.com)
 - **Backend API:** [https://nexus-erp-api-rars.onrender.com](https://nexus-erp-api-rars.onrender.com)
